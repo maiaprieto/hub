@@ -19,8 +19,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#E9EEE6; --surface:#F7F9F5; --surface-2:#DFE6DB; --ink:#17251E; --ink-2:#4B5D53; --ink-3:#7A8A80;
-  --line:#CBD6C7; --pine:#24705F; --pine-ink:#F4FAF6; --ochre:#B7791F; --ochre-soft:#F3E3C2;
+  --bg:#E9EEE6; --surface:#F7F9F5; --surface-2:#DFE6DB; --ink:#17251E; --ink-2:#45564C; --ink-3:#5F6F65;
+  --line:#CBD6C7; --pine:#24705F; --pine-ink:#F4FAF6; --ochre:#8C5A10; --ochre-soft:#F3E3C2; --ochre-dot:#C98A2B;
   --rust:#B5462F; --rust-soft:#F5DCD3; --sky:#3E6E93; --sky-soft:#D9E6EF;
   --radius-lg:22px; --radius:14px; --radius-sm:9px;
   --font-display:"Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
@@ -30,13 +30,13 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#121A16; --surface:#1A241F; --surface-2:#22302A; --ink:#E4ECE6; --ink-2:#A9B9AF; --ink-3:#7E8F85;
-    --line:#2E3E36; --pine:#62C2A9; --pine-ink:#0E1D17; --ochre:#E8B95B; --ochre-soft:#3B3020;
+    --line:#2E3E36; --pine:#62C2A9; --pine-ink:#0E1D17; --ochre:#E8B95B; --ochre-soft:#3B3020; --ochre-dot:#E8B95B;
     --rust:#EE8A72; --rust-soft:#3D2620; --sky:#8DB9DA; --sky-soft:#1E2E3A; color-scheme: dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#121A16; --surface:#1A241F; --surface-2:#22302A; --ink:#E4ECE6; --ink-2:#A9B9AF; --ink-3:#7E8F85;
-  --line:#2E3E36; --pine:#62C2A9; --pine-ink:#0E1D17; --ochre:#E8B95B; --ochre-soft:#3B3020;
+  --line:#2E3E36; --pine:#62C2A9; --pine-ink:#0E1D17; --ochre:#E8B95B; --ochre-soft:#3B3020; --ochre-dot:#E8B95B;
   --rust:#EE8A72; --rust-soft:#3D2620; --sky:#8DB9DA; --sky-soft:#1E2E3A; color-scheme: dark;
 }
 *{box-sizing:border-box}
@@ -77,19 +77,22 @@ a{color:var(--pine)}
 .hero .summary{margin:10px 0 0;color:var(--ink-2);font-size:16px}
 
 /* Day strip — the one bold element */
-.strip{display:grid;grid-template-columns:repeat(14,minmax(38px,1fr));gap:6px;overflow-x:auto;scrollbar-width:none;
-  margin:0 -16px;padding:4px 16px 8px;scroll-snap-type:x proximity}
+.strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding:4px 0 6px}
 .strip::-webkit-scrollbar{display:none}
-.day{scroll-snap-align:start;border:0;background:var(--surface);border-radius:16px;padding:8px 0 9px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;min-height:76px;position:relative}
+.day{border:0;color:inherit;background:var(--surface);border-radius:16px;padding:8px 0 9px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;min-height:72px;position:relative}
 .day .wd{font-size:12px;color:var(--ink-3)}
 .day .dn{font-family:var(--font-display);font-weight:700;font-size:20px;line-height:1.1}
 .day .dots{display:flex;gap:3px;height:8px;margin-top:4px}
 .day .dots i{width:7px;height:7px;border-radius:50%;display:block}
-.dot-entrega{background:var(--ochre)} .dot-op{background:var(--pine)} .dot-ev{background:var(--sky)}
+.dot-entrega{background:var(--ochre-dot)} .dot-op{background:var(--pine)} .dot-ev{background:var(--sky)}
 .day.today{background:var(--ink);color:var(--bg)}
 .day.today .wd{color:inherit;opacity:.75}
 .day.weekend:not(.today){background:var(--surface-2)}
 .day[aria-pressed="true"]:not(.today){outline:2px solid var(--ink)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--ink-3);margin:2px 2px 0}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.day.past-week{opacity:.9}
 .day-detail{background:var(--surface);border-radius:var(--radius);padding:12px 14px;margin:4px 0 0;font-size:15px}
 .day-detail h3{font-family:var(--font-display);font-size:16px;margin:0 0 6px}
 .day-detail ul{margin:0;padding-left:18px}
@@ -110,6 +113,8 @@ a{color:var(--pine)}
 .item-meta{font-size:14px;color:var(--ink-2)}
 .item-body{font-size:15px;color:var(--ink-2);margin:2px 0 0}
 .item-body strong{color:var(--ink)}
+.clamp{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.more{border:0;background:none;padding:2px 0;color:var(--pine);font-weight:700;font-size:14px;cursor:pointer;justify-self:start}
 .item-link{font-size:14px;font-weight:700;text-decoration:none;margin-top:4px;justify-self:start}
 
 .chip{display:inline-block;font-size:13px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
@@ -121,6 +126,7 @@ a{color:var(--pine)}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 
 /* Custom checkbox */
+.tick-wrap{display:grid;place-items:center;width:44px;height:44px;margin:-9px -6px 0 -9px;cursor:pointer}
 .tick{appearance:none;-webkit-appearance:none;width:26px;height:26px;border-radius:8px;border:2px solid var(--ink-3);margin:1px 0 0;cursor:pointer;display:grid;place-items:center;background:transparent}
 .tick:checked{background:var(--pine);border-color:var(--pine)}
 .tick:checked::after{content:"";width:12px;height:7px;border-left:3px solid var(--pine-ink);border-bottom:3px solid var(--pine-ink);transform:translateY(-2px) rotate(-45deg)}
@@ -165,12 +171,15 @@ details.folded .list{opacity:.75}
 .tab[aria-selected="true"]{color:var(--ink);background:var(--surface)}
 .tab .badge{position:absolute;top:5px;right:calc(50% - 26px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--rust);color:#fff;font-size:11px;display:grid;place-items:center}
 
-.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:15px;z-index:9;opacity:0;transition:opacity .2s;pointer-events:none}
-.toast.show{opacity:1}
+.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:6px 6px 6px 16px;min-height:44px;border-radius:12px;font-size:15px;z-index:9;opacity:0;transition:opacity .2s;pointer-events:none;display:flex;align-items:center;gap:8px;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;pointer-events:auto}
+.toast:not(.has-undo){padding-right:16px}
+.toast button{border:0;background:transparent;color:var(--bg);font-weight:700;text-decoration:underline;padding:8px 10px;cursor:pointer;font-size:15px}
+.stale{background:var(--rust-soft);color:var(--ink);border-radius:var(--radius);padding:10px 14px;font-size:15px;margin:0 0 14px}
 
 @media (prefers-reduced-motion: no-preference){
-  .hero .date{animation:rise .5s cubic-bezier(.2,.7,.2,1) both}
-  .strip .day{animation:rise .45s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i) * 25ms + 80ms)}
+  .intro .hero .date{animation:rise .5s cubic-bezier(.2,.7,.2,1) both}
+  .intro .strip .day{animation:rise .45s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i) * 25ms + 80ms)}
   @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 }
 @media (min-width:600px){ .hero .date{font-size:64px} }
@@ -230,7 +239,7 @@ details.folded .list{opacity:.75}
   </div>
 </nav>
 
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"><span id="toast-msg"></span><button type="button" id="toast-undo" class="hidden">Deshacer</button></div>
 
 <script>
 (() => {
@@ -292,6 +301,7 @@ function showLock(msg){
   setTimeout(() => $("pass").focus(), 50);
 }
 function showApp(){
+  const app = $("app"); app.classList.add("intro"); setTimeout(() => app.classList.remove("intro"), 1200);
   $("lock").classList.add("hidden");
   $("app").classList.remove("hidden"); $("tabs").classList.remove("hidden");
   render();
@@ -336,6 +346,7 @@ $("lock-form").addEventListener("submit", async ev => {
 });
 
 $("lock-btn").addEventListener("click", () => {
+  if (!confirm("¿Bloquear la app? Tendrás que volver a escribir la clave para abrirla.")) return;
   store.del(KEY_STORE); data = null; showLock("App bloqueada. Tendrás que escribir la clave otra vez.");
 });
 
@@ -404,7 +415,19 @@ function section(id, title, inner, count){
   return `<div class="section" id="${id}"><div class="section-head"><h2>${esc(title)}</h2>${count != null ? `<span class="count">${count}</span>` : ""}</div>${inner}</div>`;
 }
 let toastTimer;
-function toast(msg){ const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 1600); }
+let undoFn = null;
+function toast(msg, undo){
+  const t = $("toast"); $("toast-msg").textContent = msg; undoFn = undo || null;
+  $("toast-undo").classList.toggle("hidden", !undo); t.classList.toggle("has-undo", !!undo);
+  t.classList.add("show"); clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.classList.remove("show"); undoFn = null; }, undo ? 4500 : 1600);
+}
+$("toast-undo").addEventListener("click", () => { if (undoFn){ const f = undoFn; undoFn = null; f(); } $("toast").classList.remove("show"); });
+const shown = (txt, short) => {
+  if (!txt) return "";
+  if (txt.length <= 160) return `<p class="item-body">${esc(txt)}</p>`;
+  return `<p class="item-body clamp">${esc(txt)}</p><button class="more" data-more>Ver más</button>`;
+};
 
 /* ===== HOY ===== */
 let selectedDay = null;
@@ -444,23 +467,26 @@ function renderHoy(){
   if (selectedDay){
     const items = byDay[selectedDay] || [];
     const name = fmtShort.format(isoToDate(selectedDay)).replace(/\./g, "");
-    detail = `<div class="day-detail"><h3>${esc(name)}</h3>${items.length ? `<ul>${items.map(x => `<li>${esc(x.label)}</li>`).join("")}</ul>` : `<p>Día libre de entregas y eventos.</p>`}</div>`;
+    detail = `<div class="day-detail" style="margin-top:10px"><h3>${esc(name)}</h3>${items.length ? `<ul>${items.map(x => `<li>${esc(x.label)}</li>`).join("")}</ul>` : `<p>Día libre de entregas y eventos.</p>`}</div>`;
   }
 
   // Entregas
-  const entHTML = entregas.length ? `<div class="list">${
-    [...pending, ...entregas.filter(e => state.done[e.id])].map(e => {
+  const entItem = e => {
       const done = !!state.done[e.id];
-      const meta = [e.asignatura, e.hora].filter(Boolean).map(esc).join(", ");
+      const subj = e.asignatura && !(e.titulo || "").toLowerCase().includes(e.asignatura.toLowerCase()) ? e.asignatura : "";
+      const meta = [subj, e.hora].filter(Boolean).map(esc).join(", ");
       return `<article class="item with-check${done ? " done" : ""}">
-        <input type="checkbox" class="tick" data-done="${esc(e.id)}" ${done ? "checked" : ""} aria-label="Marcar como hecha: ${esc(e.titulo)}">
+        <label class="tick-wrap"><input type="checkbox" class="tick" data-done="${esc(e.id)}" ${done ? "checked" : ""} aria-label="Marcar como hecha: ${esc(e.titulo)}"></label>
         <div>
           <div class="row">${when(e.fecha)}</div>
           <p class="item-title" style="margin-top:6px">${titleHTML(e.titulo, e.enlace)}</p>
           ${meta ? `<div class="item-meta">${meta}</div>` : ""}
-          ${e.detalle ? `<p class="item-body">${esc(e.detalle)}</p>` : ""}
+          ${done ? "" : shown(e.detalle)}
         </div></article>`;
-    }).join("")}</div>` : "";
+  };
+  const doneList = entregas.filter(e => state.done[e.id]);
+  const entHTML = entregas.length ? `${pending.length ? `<div class="list">${pending.map(entItem).join("")}</div>` : `<p class="item-meta" style="margin:0 2px">Todo entregado. Bien hecho.</p>`}
+    ${doneList.length ? `<details class="folded"><summary>Hechas (${doneList.length})</summary><div class="list">${doneList.map(entItem).join("")}</div></details>` : ""}` : "";
 
   // Correos
   const corHTML = correos.length ? `<div class="list">${correos.map(c => `
@@ -475,9 +501,9 @@ function renderHoy(){
     const v = state.interest[o.id];
     const meta = [o.tipo, o.lugar].filter(Boolean).map(esc).join(", ");
     return `<article class="item${v === "si" ? " interested" : ""}">
-      <div class="row">${o.fecha ? chip(relDay(o.fecha)) : `<span class="chip">sin fecha</span>`}${meta ? `<span class="item-meta">${meta}</span>` : ""}</div>
+      <div class="row">${o.fecha ? chip(relDay(o.fecha)) : ""}${meta ? `<span class="item-meta">${meta}</span>` : ""}</div>
       <p class="item-title" style="margin-top:6px">${titleHTML(o.titulo, o.enlace)}</p>
-      ${o.detalle ? `<p class="item-body">${esc(o.detalle)}</p>` : ""}
+      ${shown(o.detalle)}
       <div class="actions">
         <button class="act yes" data-int="${esc(o.id)}" data-v="si" aria-pressed="${v === "si"}">Me interesa</button>
         <button class="act no" data-int="${esc(o.id)}" data-v="no" aria-pressed="${v === "no"}">No me interesa</button>
@@ -490,7 +516,7 @@ function renderHoy(){
     <article class="item">
       ${a.fecha ? `<div class="row"><span class="item-meta">${esc(shortDate(a.fecha))}</span></div>` : ""}
       <p class="item-title">${titleHTML(a.titulo, a.enlace)}</p>
-      ${(a.resumen || a.detalle) ? `<p class="item-body">${esc(a.resumen || a.detalle)}</p>` : ""}
+      ${shown(a.resumen || a.detalle)}
     </article>`).join("")}</div>` : "";
 
   const evHTML = eventos.length ? `<div class="list">${eventos.map(e => `
@@ -507,13 +533,16 @@ function renderHoy(){
     + section("s-avisos", "Avisos", simple(avisos))
     + section("s-eventos", "En tu calendario", evHTML);
 
-  $("view-hoy").innerHTML = `
+  const hoyAge = h.updated ? (Date.now() - new Date(h.updated)) / 36e5 : 0;
+  const stale = hoyAge > 30 ? `<p class="stale" role="status">Estos datos son de ${esc(ago(h.updated).replace("Actualizado ", ""))}: la actualización diaria no ha llegado. Pídele a Claude que revise la tarea «Hub: pestaña Hoy».</p>` : "";
+  $("view-hoy").innerHTML = `${stale}
     <div class="hero">
       <p class="weekday">${esc(fmtWd.format(d))}</p>
       <h1 class="date">${esc(fmtLong.format(d))}</h1>
       <p class="summary">${esc(summary)}</p>
     </div>
     <div class="strip" role="group" aria-label="Próximos 14 días">${strip}</div>
+    <div class="legend" aria-hidden="true"><span><i class="dot-entrega"></i>Fecha límite</span><span><i class="dot-op"></i>Oportunidad</span><span><i class="dot-ev"></i>Evento</span></div>
     ${detail}
     ${body || `<div class="section"><div class="empty"><h3>Todo en orden</h3><p>No hay entregas, avisos ni correos pendientes. Mañana a las 8:00 se vuelve a revisar.</p></div></div>`}
     <p class="note">Se actualiza cada día a las 8:00. Lo que marcas se guarda solo en este móvil.</p>`;
@@ -548,8 +577,8 @@ function renderEmpleo(){
     let vis = arr.filter(j => !state.hidden[j.id]);
     if (empleoFilter === "guardadas") vis = vis.filter(j => state.saved[j.id]);
     const off = arr.filter(j => state.hidden[j.id]);
-    if (!vis.length && !off.length) return "";
-    return `${vis.length ? `<div class="list">${vis.map(j => jobItem(j, maybe)).join("")}</div>` : `<p class="item-meta" style="margin:0 2px">Nada guardado aquí.</p>`}
+    if (!vis.length && (!off.length || empleoFilter === "guardadas")) return "";
+    return `${vis.length ? `<div class="list">${vis.map(j => jobItem(j, maybe)).join("")}</div>` : `<p class="item-meta" style="margin:0 2px">Has ocultado todas.</p>`}
       ${off.length && empleoFilter === "todas" ? `<details class="folded"><summary>Ocultas (${off.length})</summary><div class="list">${off.map(j => jobItem(j, maybe)).join("")}</div></details>` : ""}`;
   };
 
@@ -557,27 +586,32 @@ function renderEmpleo(){
     <article class="item">
       <div class="row"><span class="chip ${/rechaz|descart/i.test(c.estado||"") ? "late" : /entrevista|avanz|seleccion/i.test(c.estado||"") ? "good" : "sky"}">${esc(c.estado || "Actualización")}</span><span class="item-meta">${c.fecha ? esc(shortDate(c.fecha)) : ""}</span></div>
       <p class="item-title" style="margin-top:6px">${titleHTML(`${c.puesto || ""}${c.empresa ? " · " + c.empresa : ""}`.replace(/^ · /, ""), c.enlace)}</p>
-      ${c.detalle ? `<p class="item-body">${esc(c.detalle)}</p>` : ""}
+      ${shown(c.detalle)}
     </article>`).join("")}</div>` : "";
 
   const ofHTML = group(ofertas, false), qzHTML = group(quizas, true);
   const savedCount = [...ofertas, ...quizas].filter(j => state.saved[j.id]).length;
+  const visibleOf = ofertas.filter(j => !state.hidden[j.id]).length;
+  const visibleQz = quizas.filter(j => !state.hidden[j.id]).length;
+  const heroNum = empleoFilter === "guardadas" ? savedCount : visibleOf;
+  const heroWord = empleoFilter === "guardadas" ? (savedCount === 1 ? "guardada" : "guardadas") : (visibleOf === 1 ? "oferta" : "ofertas");
   const upd = e.updated ? `Revisado el ${esc(shortDate(e.updated))}` : "";
 
   $("view-empleo").innerHTML = `
     <div class="hero">
       <p class="weekday">Empleo</p>
-      <h1 class="date">${ofertas.length} ${ofertas.length === 1 ? "oferta" : "ofertas"}</h1>
-      <p class="summary">Becas y prácticas en Murcia y el resto de España. ${upd ? upd + "." : ""}</p>
+      <h1 class="date">${heroNum} ${heroWord}</h1>
+      <p class="summary">${empleoFilter === "guardadas" ? "Tus ofertas guardadas, mientras sigan publicadas aquí." : `Becas y prácticas en Murcia y el resto de España${visibleQz ? `, y ${visibleQz} para pensarte` : ""}.`} ${upd ? upd + "." : ""}</p>
       <div class="segmented" role="group" aria-label="Filtrar ofertas">
         <button data-filter="todas" aria-pressed="${empleoFilter === "todas"}">Todas</button>
         <button data-filter="guardadas" aria-pressed="${empleoFilter === "guardadas"}">Guardadas (${savedCount})</button>
       </div>
     </div>
-    ${section("s-cand", "Tus candidaturas", candHTML)}
+    ${empleoFilter === "todas" ? section("s-cand", "Tus candidaturas", candHTML) : ""}
     ${section("s-of", "Encajan contigo", ofHTML)}
     ${section("s-qz", "Quizás", qzHTML)}
-    ${(!candHTML && !ofHTML && !qzHTML) ? `<div class="section"><div class="empty"><h3>Sin ofertas esta semana</h3><p>El lunes se vuelven a revisar LinkedIn y las demás plataformas.</p></div></div>` : ""}
+    ${empleoFilter === "guardadas" && !savedCount ? `<div class="section"><div class="empty"><h3>Aún no has guardado ninguna</h3><p>Pulsa «Guardar» en una oferta para tenerla a mano aquí.</p></div></div>` : ""}
+    ${empleoFilter === "todas" && !candHTML && !ofHTML && !qzHTML ? `<div class="section"><div class="empty"><h3>Sin ofertas esta semana</h3><p>El lunes se vuelven a revisar LinkedIn y las demás plataformas.</p></div></div>` : ""}
     <p class="note">Se actualiza cada lunes. Las ofertas se quedan visibles dos semanas.</p>`;
 
   const fresh = ofertas.filter(j => !state.seen[j.id] && !state.hidden[j.id]).length + cands.filter(c => !state.seen[c.id]).length;
@@ -593,8 +627,10 @@ function render(){
 document.addEventListener("change", ev => {
   const t = ev.target;
   if (t.dataset && t.dataset.done){
-    if (t.checked) state.done[t.dataset.done] = Date.now(); else delete state.done[t.dataset.done];
-    saveState(); renderHoy(); if (t.checked) toast("Marcada como hecha");
+    const id = t.dataset.done;
+    if (t.checked) state.done[id] = Date.now(); else delete state.done[id];
+    saveState(); renderHoy();
+    if (t.checked) toast("Marcada como hecha", () => { delete state.done[id]; saveState(); renderHoy(); });
   }
 });
 document.addEventListener("click", ev => {
@@ -602,18 +638,28 @@ document.addEventListener("click", ev => {
   if (b.dataset.day){ selectedDay = selectedDay === b.dataset.day ? null : b.dataset.day; renderHoy(); return; }
   if (b.dataset.int){
     const id = b.dataset.int, v = b.dataset.v;
-    if (state.interest[id] === v) delete state.interest[id]; else state.interest[id] = v;
-    saveState(); renderHoy(); return;
+    const prev = state.interest[id];
+    if (prev === v) delete state.interest[id]; else state.interest[id] = v;
+    saveState(); renderHoy();
+    if (state.interest[id] === "no") toast("Descartada", () => { if (prev) state.interest[id] = prev; else delete state.interest[id]; saveState(); renderHoy(); });
+    return;
   }
   if (b.dataset.save){
     const id = b.dataset.save; if (state.saved[id]) delete state.saved[id]; else { state.saved[id] = Date.now(); toast("Guardada"); }
     saveState(); renderEmpleo(); return;
   }
   if (b.dataset.hide){
-    const id = b.dataset.hide; if (state.hidden[id]) delete state.hidden[id]; else { state.hidden[id] = Date.now(); toast("Oculta"); }
-    saveState(); renderEmpleo(); return;
+    const id = b.dataset.hide; const was = state.hidden[id];
+    if (was) delete state.hidden[id]; else state.hidden[id] = Date.now();
+    saveState(); renderEmpleo();
+    if (!was) toast("Oferta oculta", () => { delete state.hidden[id]; saveState(); renderEmpleo(); });
+    return;
   }
   if (b.dataset.filter){ empleoFilter = b.dataset.filter; renderEmpleo(); return; }
+  if (b.hasAttribute("data-more")){
+    const p = b.previousElementSibling; const open = p.classList.toggle("clamp");
+    b.textContent = open ? "Ver más" : "Ver menos"; return;
+  }
 });
 
 function selectTab(name){
