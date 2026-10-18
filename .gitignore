@@ -1,0 +1,5 @@
+# Nunca subir datos sin cifrar
+data.json
+*.plain.json
+*.tmp
+__pycache__/
