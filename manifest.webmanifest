@@ -3,7 +3,7 @@
   "short_name": "Hub",
   "description": "Tablón personal: UMU y empleo",
   "lang": "es",
-  "start_url": "./#hoy",
+  "start_url": "./#/hoy",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
