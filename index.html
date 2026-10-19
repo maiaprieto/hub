@@ -117,11 +117,20 @@ svg.i{width:22px;height:22px;flex:none}
 /* Rows (names only) */
 .rows{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden}
 .row{display:flex;align-items:center;gap:14px;padding:12px 14px;width:100%;min-height:70px;color:inherit;text-decoration:none}
-.row + .row{border-top:1px solid var(--line)}
+.rows > * + *{border-top:1px solid var(--line)}
+.row-wrap{display:flex;align-items:center}
+.row-wrap .row{flex:1;min-width:0;padding-right:4px}
+.qcheck{flex:none;width:48px;height:48px;margin-right:8px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer;border-radius:50%}
+.qcheck span{width:28px;height:28px;border-radius:50%;border:2px solid var(--ink-3);display:grid;place-items:center;color:transparent}
+.qcheck span svg{width:16px;height:16px}
+.qcheck[aria-pressed="true"] span{background:var(--pine);border-color:var(--pine);color:var(--pine-ink)}
+.qcheck:active span{transform:scale(.9)}
 .row:active{background:var(--sunk)}
 .thumb{width:46px;height:46px;border-radius:12px;overflow:hidden;flex:none}
 .row-main{flex:1;min-width:0}
 .row-title{font-weight:700;font-size:16px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.row-sub .when{font-size:14px}
+.row-sub:empty{display:none}
 .row-sub{font-size:14px;color:var(--ink-3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .when{font-size:14px;font-weight:700;color:var(--ink-2);white-space:nowrap}
 .when.soon{color:var(--ochre)} .when.late{color:var(--rust)} .when.now{color:var(--pine)}
@@ -161,7 +170,7 @@ svg.i{width:22px;height:22px;flex:none}
 .actionbar-in{max-width:580px;margin:0 auto;display:flex;align-items:center;gap:12px}
 .actionbar .meta{flex:1;min-width:0}
 .actionbar .meta b{display:block;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.actionbar .meta span{font-size:14px;color:var(--ink-3)}
+.actionbar .meta span{font-size:14px;color:var(--ink-3);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .actionbar .btn{flex:none}
 .actionbar .two{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
 
@@ -475,7 +484,9 @@ function buildIndex(){
 const items = kind => Object.values(idx).filter(i => i.kind === kind);
 const byDate = (a, b) => (a.date || "9999").localeCompare(b.date || "9999");
 const isNew = it => !state.seen[it.id];
-const isOff = it => (it.kind === "entrega" && state.done[it.id]) || (it.kind === "oportunidad" && state.interest[it.id] === "no");
+const RES = {entrega:{a:"resuelta", grp:"Resueltas"}, correo:{a:"resuelto", grp:"Resueltos"}, aviso:{a:"resuelto", grp:"Resueltos"}, cambio:{a:"resuelto", grp:"Resueltos"}};
+const canResolve = it => !!RES[it.kind];
+const isOff = it => (canResolve(it) && state.done[it.id]) || (it.kind === "oportunidad" && state.interest[it.id] === "no");
 const active = kind => items(kind).filter(i => !isOff(i));
 
 /* ================= Router ================= */
@@ -514,7 +525,24 @@ const topTools = () => `<div class="tools">
   <button class="icon-btn" data-act="theme" aria-label="Cambiar entre modo claro y oscuro">${ic("moon")}</button>
   <button class="icon-btn" data-act="lock" aria-label="Bloquear la app">${ic("lock")}</button></div>`;
 function rowHTML(it, opts){
-  opts = opts || {}; const r = rel(it.date);
+  opts = opts || {};
+  if (opts.check && canResolve(it)){
+    const on = !!state.done[it.id];
+    return `<div class="row-wrap">${rowInner(it, Object.assign({}, opts, {check:false, whenBelow:true}))}<button class="qcheck" data-act="${on ? "undone" : "done"}" data-id="${esc(it.id)}" data-stay="1" aria-pressed="${on}" aria-label="${on ? "Desmarcar" : "Marcar como " + RES[it.kind].a}: ${esc(it.title)}"><span>${ic("check")}</span></button></div>`;
+  }
+  return rowInner(it, opts);
+}
+function rowInner(it, opts){
+  const r = rel(it.date);
+  if (opts.whenBelow){
+    const sub = [opts.sub ? it.sub : "", ""].filter(Boolean)[0] || "";
+    return `<a class="row${isOff(it) ? " done" : ""}" href="${href(it.id)}">
+      <div class="thumb">${cover(it.theme, it.id)}</div>
+      <div class="row-main"><div class="row-title">${esc(it.title)}</div>
+        <div class="row-sub">${r.t && !opts.noWhen ? `<span class="when ${r.c}">${esc(r.t)}</span>` : ""}${r.t && !opts.noWhen && sub ? " · " : ""}${esc(sub)}</div></div>
+      ${isNew(it) && !opts.noNew ? `<span class="newdot" role="img" aria-label="Nuevo"></span>` : ""}
+    </a>`;
+  }
   return `<a class="row${isOff(it) ? " done" : ""}" href="${href(it.id)}">
     <div class="thumb">${cover(it.theme, it.id)}</div>
     <div class="row-main"><div class="row-title">${esc(it.title)}</div>${opts.sub && it.sub ? `<div class="row-sub">${esc(it.sub)}</div>` : ""}</div>
@@ -532,7 +560,7 @@ const emptyCard = (theme, title, text) => `<div class="empty">${cover(theme, tit
 
 /* ================= HOY ================= */
 function pickFocus(){
-  const today = todayISO(), ents = active("entrega").filter(e => diff(e.date, today) >= -1).sort(byDate), cors = items("correo").sort(byDate), ops = active("oportunidad").filter(o => o.date && diff(o.date, today) >= 0).sort(byDate);
+  const today = todayISO(), ents = active("entrega").filter(e => diff(e.date, today) >= -1).sort(byDate), cors = active("correo").sort(byDate), ops = active("oportunidad").filter(o => o.date && diff(o.date, today) >= 0).sort(byDate);
   const urgent = ents.find(e => diff(e.date, today) <= 3);
   if (urgent) return {it:urgent, why:"Es lo más urgente"};
   if (cors.length) return {it:cors[0], why:`${cors[0].sub || "Alguien"} espera tu respuesta`};
@@ -573,18 +601,25 @@ function viewHoy(){
 function viewList(kind){
   if (!KIND[kind]) return viewHoy();
   const all = items(kind), off = all.filter(isOff), list = all.filter(i => !isOff(i));
-  const empty = kind === "entrega" ? ["Todo entregado", "No te queda ninguna entrega pendiente. Bien hecho."] : kind === "correo" ? ["Nadie espera respuesta", "Estás al día con tus correos."] : ["Nada por aquí", "Cuando llegue algo nuevo aparecerá aquí."];
+  const empty = kind === "entrega" ? ["Todo entregado", "No te queda ninguna entrega pendiente. Bien hecho."] : kind === "correo" ? ["Nadie espera respuesta", "Estás al día con tus correos."] : kind === "aviso" || kind === "cambio" ? ["Todo leído", "No te queda nada por revisar aquí."] : ["Nada por aquí", "Cuando llegue algo nuevo aparecerá aquí."];
   return `<div class="page">
     <div class="top"><a class="back" href="#/hoy" data-act="back" data-fallback="#/hoy">${ic("back")} Hoy</a></div>
     <h1 class="page-title">${KIND[kind].many}</h1>
-    ${list.length ? grouped(list, {sub: kind === "correo"}) : `<div style="margin-top:14px">${emptyCard(KIND[kind].theme, empty[0], empty[1])}</div>`}
-    ${off.length ? `<p class="group-label">${kind === "entrega" ? "Hechas" : "Descartadas"}</p><div class="rows">${off.sort(byDate).map(i => rowHTML(i, {noWhen:true})).join("")}</div>` : ""}
+    ${list.length ? grouped(list, {sub: kind === "correo", check:true}) : `<div style="margin-top:14px">${emptyCard(KIND[kind].theme, empty[0], empty[1])}</div>`}
+    ${off.length ? `<p class="group-label">${RES[kind] ? RES[kind].grp : "Descartadas"}</p><div class="rows">${off.sort(byDate).map(i => rowHTML(i, {noWhen:true, noNew:true, check:true})).join("")}</div>` : ""}
   </div>`;
 }
 
 /* ================= DETAIL ================= */
 const fact = (icon, k, v) => v ? `<li>${ic(icon)}<div><div class="fact-k">${esc(k)}</div><div class="fact-v">${esc(v)}</div></div></li>` : "";
 function dateFact(iso){ if (!iso) return ""; const r = rel(iso), l = cap(longDate(iso)); return r.t && !r.exact ? `${l} · ${r.t.toLowerCase()}` : l; }
+function resolveParts(it, metaB, metaS, secondary){
+  const id = it.id, done = !!state.done[id], a = RES[it.kind].a;
+  const extra = done ? `<div class="done-banner">${ic("check")} Lo marcaste como ${a}</div>` : "";
+  const barHTML = `<div class="meta"><b>${esc(metaB || "")}</b><span>${done ? cap(a) : esc(metaS || "Pendiente")}</span></div>
+    ${done ? `<button class="btn btn-ghost" data-act="undone" data-id="${esc(id)}">Desmarcar</button>` : `<button class="btn btn-primary" data-act="done" data-id="${esc(id)}">${ic("check")} Marcar como ${a}</button>`}`;
+  return {extra: extra + (secondary ? `<div class="secondary-actions">${secondary}</div>` : ""), bar: barHTML};
+}
 function bar(inner){ const b = $("actionbar"); b.innerHTML = `<div class="actionbar-in">${inner}</div>`; b.classList.remove("hidden"); }
 function viewDetail(id){
   const it = idx[id];
@@ -596,18 +631,15 @@ function viewDetail(id){
   let facts = "", body = "", extra = "";
   switch (it.kind){
     case "entrega": {
-      const done = !!state.done[id];
       facts = fact("calendar", "Fecha", dateFact(x.fecha)) + fact("book", "Asignatura o trámite", x.asignatura) + fact("clock", "Hora", x.hora);
       body = x.detalle ? `<p class="prose">${esc(x.detalle)}</p>` : "";
-      if (done) extra = `<div class="done-banner">${ic("check")} La marcaste como hecha</div>`;
-      if (link) extra += `<div class="secondary-actions">${openBtn("Ver el original", "btn-ghost")}</div>`;
-      bar(`<div class="meta"><b>${esc(rel(x.fecha).t || "")}</b><span>${done ? "Hecha" : "Pendiente"}</span></div>
-        ${done ? `<button class="btn btn-ghost" data-act="undone" data-id="${esc(id)}">Desmarcar</button>` : `<button class="btn btn-primary" data-act="done" data-id="${esc(id)}">${ic("check")} Marcar como hecha</button>`}`);
+      const rp = resolveParts(it, rel(x.fecha).t, "Pendiente", openBtn("Ver el original", "btn-ghost"));
+      extra = rp.extra; bar(rp.bar);
       break; }
     case "correo":
       facts = fact("user", "De", x.de) + fact("calendar", "Recibido", x.fecha ? cap(longDate(x.fecha)) : "");
       body = x.resumen ? `<p class="prose">${esc(x.resumen)}</p>` : "";
-      bar(`<div class="meta"><b>${esc(x.de || "")}</b><span>Espera tu respuesta</span></div>${openBtn("Abrir en Gmail")}`);
+      { const rp = resolveParts(it, x.de, "Espera tu respuesta", openBtn("Abrir en Gmail", "btn-ghost")); extra = rp.extra; bar(rp.bar); }
       break;
     case "oportunidad": {
       const v = state.interest[id];
@@ -621,7 +653,7 @@ function viewDetail(id){
     case "aviso": case "cambio":
       facts = fact("calendar", "Fecha", x.fecha ? cap(longDate(x.fecha)) : "");
       body = (x.resumen || x.detalle) ? `<p class="prose">${esc(x.resumen || x.detalle)}</p>` : "";
-      if (link) bar(`<div class="meta"><b>${esc(KIND[it.kind].one)}</b><span>${x.fecha ? esc(shortDate(x.fecha)) : ""}</span></div>${openBtn("Abrir correo")}`);
+      { const rp = resolveParts(it, KIND[it.kind].one, "Por revisar", openBtn("Abrir correo", "btn-ghost")); extra = rp.extra; bar(rp.bar); }
       break;
     case "evento":
       facts = fact("calendar", "Cuándo", dateFact(x.inicio) + (x.fin && x.fin !== x.inicio ? ` hasta el ${fDayMonth.format(D(x.fin))}` : "")) + fact("clock", "Hora", x.hora) + fact("pin", "Dónde", x.lugar);
@@ -787,7 +819,7 @@ function reviewStep(kind){
 /* ================= Badges ================= */
 function badges(){
   const today = todayISO();
-  const hoyN = active("entrega").filter(e => diff(e.date, today) <= 2).length + items("correo").length;
+  const hoyN = active("entrega").filter(e => diff(e.date, today) <= 2).length + active("correo").length;
   const empUpd = (data.empleo && data.empleo.updated) || "";
   const empN = state.empSeen === empUpd ? 0 : [...items("oferta"), ...items("candidatura")].filter(i => isNew(i) && !state.hidden[i.id]).length;
   $("b-hoy").textContent = hoyN; $("b-hoy").classList.toggle("hidden", !hoyN);
@@ -804,8 +836,12 @@ document.addEventListener("click", ev => {
     case "theme": toggleTheme(); break;
     case "lock": if (confirm("¿Bloquear la app? Tendrás que volver a escribir la clave para abrirla.")){ store.del(KEY_STORE); data = null; showLock("App bloqueada."); } break;
     case "back": goBack(b.dataset.fallback); break;
-    case "done": state.done[id] = Date.now(); save(); toast("Marcada como hecha", () => { delete state.done[id]; save(); render(); }); goBack("#/lista/entrega"); break;
-    case "undone": delete state.done[id]; save(); render(); break;
+    case "done": { const it = idx[id], a = it && RES[it.kind] ? RES[it.kind].a : "resuelto";
+      state.done[id] = Date.now(); save();
+      toast(cap(a), () => { delete state.done[id]; save(); render(); });
+      if (b.dataset.stay) render(); else goBack("#/lista/" + (it ? it.kind : "entrega"));
+      break; }
+    case "undone": delete state.done[id]; save(); render(); if (b.dataset.stay) toast("Vuelve a estar pendiente"); break;
     case "int": { const prev = state.interest[id], v = b.dataset.v;
       if (prev === v) delete state.interest[id]; else state.interest[id] = v; save();
       if (state.interest[id] === "no"){ toast("Descartada", () => { if (prev) state.interest[id] = prev; else delete state.interest[id]; save(); render(); }); goBack("#/lista/oportunidad"); }
