@@ -206,9 +206,9 @@ svg.i{width:22px;height:22px;flex:none}
 }
 
 /* Agenda */
-.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:16px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px;touch-action:pan-y}
 .cal .wdh{font-size:13px;color:var(--ink-3);text-align:center;padding-bottom:2px}
-.day{border:0;background:var(--surface);border-radius:14px;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;box-shadow:var(--shadow);color:inherit;padding:0}
+.day{border:0;background:var(--surface);border-radius:14px;min-height:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;box-shadow:var(--shadow);color:inherit;padding:0}
 .day .n{font-family:var(--display);font-weight:650;font-size:19px;line-height:1}
 .day .dots{display:flex;gap:3px;height:6px}
 .day .dots i{width:6px;height:6px;border-radius:50%}
@@ -216,6 +216,12 @@ svg.i{width:22px;height:22px;flex:none}
 .day.off{background:transparent;box-shadow:none;color:var(--ink-3);cursor:default}
 .day[aria-pressed="true"]:not(.today){outline:2.5px solid var(--ink)}
 .dk-entrega{background:#D9932F} .dk-oportunidad{background:#2F8F6F} .dk-evento{background:#7D6CC4}
+.month-bar{display:flex;align-items:center;justify-content:space-between;margin:14px -10px 0}
+.month-bar .h2{font-size:21px}
+.month-bar .icon-btn{color:var(--ink);width:48px;height:48px}
+.month-bar .icon-btn:disabled{opacity:.3;cursor:default}
+.today-link{margin:0 0 2px}
+.cal > span{min-height:48px}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13.5px;color:var(--ink-3);margin:12px 2px 0}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend i{width:8px;height:8px;border-radius:50%}
@@ -648,37 +654,65 @@ function viewDetail(id){
     </div></article>`;
 }
 
-/* ================= AGENDA ================= */
-function viewAgenda(selected){
-  const today = todayISO(), start = addDays(today, -((D(today).getUTCDay() + 6) % 7));
+/* ================= AGENDA (month view, navigable) ================= */
+const fMonth = F({month:"long", year:"numeric"});
+const monthOf = iso => iso.slice(0,7);
+function shiftMonth(ym, n){ let [y, m] = ym.split("-").map(Number); m += n; while (m > 12){ m -= 12; y++; } while (m < 1){ m += 12; y--; } return `${y}-${pad(m)}`; }
+function viewAgenda(arg){
+  const today = todayISO(), thisMonth = monthOf(today);
+  const selected = arg && arg.length === 10 ? arg : null;
+  let ym = arg ? arg.slice(0,7) : thisMonth;
+  if (ym < thisMonth) ym = thisMonth;
   const all = [...active("entrega"), ...active("oportunidad"), ...items("evento")].filter(i => i.date);
   const byDay = {}; all.forEach(i => { const k = i.date.slice(0,10); (byDay[k] = byDay[k] || []).push(i); });
+  const first = ym + "-01", lead = (D(first).getUTCDay() + 6) % 7;
+  const daysIn = new Date(Date.UTC(+ym.slice(0,4), +ym.slice(5,7), 0)).getUTCDate();
   let cells = ["L","M","X","J","V","S","D"].map(d => `<div class="wdh" aria-hidden="true">${d}</div>`).join("");
-  const offset = diff(today, start), cellsN = Math.ceil((offset + 14) / 7) * 7;
-  for (let i = 0; i < cellsN; i++){
-    const iso = addDays(start, i), past = diff(iso, today) < 0, its = byDay[iso] || [];
+  for (let i = 0; i < lead; i++) cells += `<span aria-hidden="true"></span>`;
+  for (let dn = 1; dn <= daysIn; dn++){
+    const iso = `${ym}-${pad(dn)}`, past = iso < today, its = byDay[iso] || [];
     const dots = [...new Set(its.map(x => x.kind))].map(k => `<i class="dk-${k}"></i>`).join("");
-    cells += `<button class="day${iso === today ? " today" : ""}${past ? " off" : ""}" ${past ? "disabled" : ""} data-act="day" data-day="${iso}" aria-pressed="${selected === iso}" aria-label="${esc(cap(longDate(iso)))}${its.length ? `, ${its.length} ${its.length === 1 ? "cosa" : "cosas"}` : ""}"><span class="n">${D(iso).getUTCDate()}</span><span class="dots">${dots}</span></button>`;
+    cells += `<button class="day${iso === today ? " today" : ""}${past ? " off" : ""}" ${past ? "disabled" : ""} data-act="day" data-day="${iso}" aria-pressed="${selected === iso}" aria-label="${esc(cap(longDate(iso)))}${its.length ? `, ${its.length} ${its.length === 1 ? "cosa" : "cosas"}` : ""}"><span class="n">${dn}</span><span class="dots">${dots}</span></button>`;
   }
   const label = d => { const r = rel(d); return r.exact ? cap(longDate(d)) : `${r.t}, ${fDayMonth.format(D(d))}`; };
+  const monthName = cap(fMonth.format(D(first)));
   let list;
   if (selected){
     const its = (byDay[selected] || []).sort(byDate);
     list = `<p class="group-label">${esc(label(selected))}</p>${its.length ? `<div class="rows">${its.map(i => rowHTML(i, {noWhen:true, noNew:true})).join("")}</div>` : `<p class="lede">Día libre.</p>`}
-      <button class="link-btn" data-act="day" data-day="" style="margin-top:8px">Ver todas las fechas</button>`;
+      <button class="link-btn" data-act="day" data-day="${ym}" style="margin-top:8px">Ver todo ${esc(fMonth.format(D(first)).replace(/ de \d+$/, ""))}</button>`;
   } else {
-    const upcoming = all.filter(i => diff(i.date, today) >= 0).sort(byDate), days = [...new Set(upcoming.map(i => i.date.slice(0,10)))];
-    list = days.length ? days.map(d => `<p class="group-label">${esc(label(d))}</p><div class="rows">${upcoming.filter(i => i.date.slice(0,10) === d).map(i => rowHTML(i, {noWhen:true, noNew:true})).join("")}</div>`).join("")
-      : emptyCard("evento", "Agenda despejada", "No hay fechas en las próximas semanas.");
+    const inMonth = all.filter(i => monthOf(i.date) === ym && i.date.slice(0,10) >= today).sort(byDate), days = [...new Set(inMonth.map(i => i.date.slice(0,10)))];
+    const later = all.filter(i => monthOf(i.date) > ym).sort(byDate)[0];
+    list = days.length ? days.map(d => `<p class="group-label">${esc(label(d))}</p><div class="rows">${inMonth.filter(i => i.date.slice(0,10) === d).map(i => rowHTML(i, {noWhen:true, noNew:true})).join("")}</div>`).join("")
+      : emptyCard("evento", ym === thisMonth ? "Nada más este mes" : "Mes despejado", later ? `Lo siguiente es el ${fDayMonth.format(D(later.date))}.` : "Aún no hay fechas apuntadas para este mes.");
   }
+  const prevOk = ym > thisMonth;
   return `<div class="page">
-    <div class="top"><p class="eyebrow">Las próximas dos semanas</p>${topTools()}</div>
+    <div class="top"><p class="eyebrow">Tus fechas, mes a mes</p>${topTools()}</div>
     <h1 class="greet">Agenda</h1>
-    <div class="cal" role="group" aria-label="Calendario de dos semanas">${cells}</div>
+    <div class="month-bar">
+      <button class="icon-btn" data-act="month" data-ym="${shiftMonth(ym, -1)}" ${prevOk ? "" : "disabled"} aria-label="Mes anterior">${ic("back")}</button>
+      <h2 class="h2" aria-live="polite">${esc(monthName)}</h2>
+      <button class="icon-btn" data-act="month" data-ym="${shiftMonth(ym, 1)}" aria-label="Mes siguiente">${ic("chev")}</button>
+    </div>
+    ${ym !== thisMonth ? `<button class="link-btn today-link" data-act="month" data-ym="${thisMonth}">Volver a hoy</button>` : ""}
+    <div class="cal" id="cal" role="group" aria-label="Calendario de ${esc(monthName)}">${cells}</div>
     <div class="legend" aria-hidden="true"><span><i class="dk-entrega"></i>Fecha límite</span><span><i class="dk-oportunidad"></i>Oportunidad</span><span><i class="dk-evento"></i>Evento</span></div>
     <div class="sec" style="margin-top:14px">${list}</div>
   </div>`;
 }
+// Swipe left/right on the calendar to change month
+(function(){
+  let x0 = null, y0 = null;
+  document.addEventListener("touchstart", e => { if (e.target.closest("#cal")){ x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; } }, {passive:true});
+  document.addEventListener("touchend", e => {
+    if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
+    if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx)) return;
+    const btn = document.querySelectorAll('.month-bar [data-act="month"]')[dx < 0 ? 1 : 0];
+    if (btn && !btn.disabled) btn.click();
+  }, {passive:true});
+})();
 
 /* ================= EMPLEO ================= */
 function jobCard(it){
@@ -782,6 +816,7 @@ document.addEventListener("click", ev => {
       if (!was){ toast("Oferta oculta", () => { delete state.hidden[id]; save(); render(); }); goBack("#/empleo"); } else render(); break; }
     case "tab": location.replace("#/empleo/" + b.dataset.tab); break;
     case "day": location.replace(b.dataset.day ? "#/agenda/" + b.dataset.day : "#/agenda"); break;
+    case "month": if (!b.disabled) location.replace("#/agenda/" + b.dataset.ym); break;
     case "r-save": reviewStep("save"); break;
     case "r-hide": reviewStep("hide"); break;
     case "r-later": reviewStep("later"); break;

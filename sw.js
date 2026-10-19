@@ -1,5 +1,5 @@
 // Hub service worker: la app abre sin conexión con los últimos datos descargados.
-const VERSION = "hub-v3";
+const VERSION = "hub-v4";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png"];
 
 self.addEventListener("install", e => {
