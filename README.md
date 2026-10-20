@@ -1,4 +1,4 @@
-# Hub
+# Organización Maia
 
 Tablón personal para el móvil: avisos de la universidad y búsqueda de empleo.
 

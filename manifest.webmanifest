@@ -1,7 +1,7 @@
 {
-  "name": "Hub · Maia",
-  "short_name": "Hub",
-  "description": "Tablón personal: UMU y empleo",
+  "name": "Organización Maia",
+  "short_name": "Organización Maia",
+  "description": "Tablón personal de Maia: universidad y empleo",
   "lang": "es",
   "start_url": "./#/hoy",
   "scope": "./",
@@ -10,8 +10,23 @@
   "background_color": "#E9EEE6",
   "theme_color": "#24705F",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "icons/eco-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/eco-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/eco-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }

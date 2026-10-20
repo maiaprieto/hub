@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Hub</title>
+<title>Organización Maia</title>
 <meta name="description" content="Tablón personal de Maia: universidad y empleo">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#F6F7F4" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#101513" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Hub">
+<meta name="apple-mobile-web-app-title" content="Organización Maia">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/eco-192.png">
+<link rel="apple-touch-icon" href="icons/eco-apple-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,650;12..96,800&display=swap" rel="stylesheet">
@@ -60,7 +60,7 @@ svg.i{width:22px;height:22px;flex:none}
 .lock{min-height:100dvh;display:grid;place-items:center;padding:24px 20px calc(24px + env(safe-area-inset-bottom))}
 .lock-card{width:100%;max-width:380px}
 .lock-art{height:170px;border-radius:var(--r-xl);overflow:hidden;margin-bottom:26px;box-shadow:var(--shadow)}
-.lock h1{font-family:var(--display);font-weight:800;font-size:44px;line-height:1;letter-spacing:-.02em;margin:0 0 6px}
+.lock h1{font-family:var(--display);font-weight:800;font-size:40px;line-height:1;letter-spacing:-.02em;margin:0 0 6px}
 .lock p{color:var(--ink-2);margin:0 0 22px}
 .field{display:flex;gap:6px;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);padding:4px 4px 4px 14px;align-items:center}
 .field:focus-within{border-color:var(--pine)}
@@ -266,7 +266,7 @@ svg.i{width:22px;height:22px;flex:none}
 <main id="lock" class="lock hidden" aria-labelledby="lock-title">
   <form class="lock-card" id="lock-form" autocomplete="off">
     <div class="lock-art cover" id="lock-art"></div>
-    <h1 id="lock-title">Hub</h1>
+    <h1 id="lock-title">Organización Maia</h1>
     <p>Escribe tu clave para abrir tu tablón.</p>
     <label for="pass" class="sr">Clave</label>
     <div class="field">
@@ -516,7 +516,7 @@ function render(){
   const section = page === "lista" ? "hoy" : (page || "hoy");
   document.querySelectorAll(".nav a").forEach(a => a.setAttribute("aria-current", a.dataset.nav === section ? "page" : "false"));
   badges();
-  document.title = page === "item" && idx[decodeURIComponent(arg || "")] ? idx[decodeURIComponent(arg)].title + " · Hub" : "Hub";
+  document.title = page === "item" && idx[decodeURIComponent(arg || "")] ? idx[decodeURIComponent(arg)].title + " · Organización Maia" : "Organización Maia";
 }
 
 /* ================= Shared bits ================= */
@@ -573,7 +573,7 @@ function viewHoy(){
   const hr = +new Intl.DateTimeFormat("en-GB", {timeZone:TZ, hour:"numeric", hour12:false}).format(new Date());
   const hello = hr >= 6 && hr < 14 ? "Buenos días, Maia" : hr >= 14 && hr < 21 ? "Buenas tardes, Maia" : "Buenas noches, Maia";
   const age = h.updated ? (Date.now() - new Date(h.updated)) / 36e5 : 0;
-  const stale = age > 30 ? `<p class="stale" role="status">Estos datos son de ${esc(ago(h.updated))}. La actualización de esta mañana no ha llegado: pídele a Claude que revise la tarea «Hub: pestaña Hoy».</p>` : "";
+  const stale = age > 30 ? `<p class="stale" role="status">Estos datos son de ${esc(ago(h.updated))}. La actualización de esta mañana no ha llegado: pídele a Claude que revise la tarea «Organización Maia: Hoy».</p>` : "";
   const f = pickFocus();
   const focus = f ? (() => { const r = rel(f.it.date);
       const pillTxt = f.it.kind === "correo" && f.it.date ? (diff(todayISO(), f.it.date) > 0 ? `Esperando ${diff(todayISO(), f.it.date)} ${diff(todayISO(), f.it.date) === 1 ? "día" : "días"}` : "Llegó hoy") : r.t;
@@ -874,7 +874,7 @@ async function refresh(silent){
   }catch(e){ if (!silent) toast("No se ha podido actualizar"); }
 }
 async function boot(){
-  $("lock-art").innerHTML = coverSVG("lock", "hub"); $("toggle-pass").innerHTML = ic("eye"); hydrateIcons(document);
+  $("lock-art").innerHTML = coverSVG("oportunidad", "organizacion-maia"); $("toggle-pass").innerHTML = ic("eye"); hydrateIcons(document);
   if (location.hash === "#hoy" || location.hash === "#empleo") history.replaceState(null, "", "#/" + location.hash.slice(1));
   try{ env = await fetchEnv(); }catch(e){ showLock("No se ha podido cargar el archivo de datos. Revisa la conexión y vuelve a abrir la app."); return; }
   const key = await cachedKey(env);
