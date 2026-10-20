@@ -1,6 +1,6 @@
 {
   "name": "Organización Maia",
-  "short_name": "Organización Maia",
+  "short_name": "org.maia",
   "description": "Tablón personal de Maia: universidad y empleo",
   "lang": "es",
   "start_url": "./#/hoy",

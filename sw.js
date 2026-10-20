@@ -1,5 +1,5 @@
 // Service worker de Organización Maia: la app abre sin conexión con los últimos datos descargados.
-const VERSION = "hub-v6";
+const VERSION = "hub-v7";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/eco-192.png", "icons/eco-512.png"];
 
 self.addEventListener("install", e => {
